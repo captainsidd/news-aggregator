@@ -1,21 +1,22 @@
+"""
+Used to test if things work
+"""
 import os
-from dotenv import load_dotenv, find_dotenv
+import json
 import requests
 
-load_dotenv(find_dotenv())
-query = input('Input your query: ')
-
 params = {
-  'q': query,
   'language': 'en',
-  'sortBy': 'relevancy',
-  'pageSize': '25',
+  'country': 'us',
+  'category': 'general'
 }
 
 response = requests.get(
-  'https://newsapi.org/v2/everything', 
-  params=params, 
-  headers={'Authorization': os.getenv('NEWS_API_KEY', '')}
+  'https://newsapi.org/v2/sources',
+  params=params,
+  headers={'Authorization': #REDACTED}
 )
 
-print(response.text)
+sources_obj = json.loads(response.text)
+names = list(map(lambda x: x['name'], sources_obj['sources']))
+print(','.join(names))
