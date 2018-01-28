@@ -27,6 +27,10 @@ def top_articles(event, context):
     analyzed_articles = analyze_descriptions(selected_articles)
     response = {
         'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Origin': "*",
+            'Access-Control-Allow-Credentials': True
+        },
         'body': json.dumps(analyzed_articles)
     }
     return response
@@ -53,6 +57,10 @@ def query_article(event, context):
     analyzed_articles = analyze_descriptions(selected_articles)
     response = {
         'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Origin': "*",
+            'Access-Control-Allow-Credentials': True
+        },
         'body': json.dumps(analyzed_articles)
     }
     return response
