@@ -24,7 +24,7 @@ def top_articles(event, context):
         headers={'Authorization': os.getenv('NEWS_API_KEY', '')}
     )
     selected_articles = select_parse_random(json.loads(news_articles.text))
-    analyzed_articles = analyzeDescriptions(selected_articles)
+    analyzed_articles = analyze_descriptions(selected_articles)
     response = {
         'statusCode': 200,
         'body': json.dumps(analyzed_articles)
@@ -50,7 +50,7 @@ def query_article(event, context):
         headers={'Authorization': os.getenv('NEWS_API_KEY', '')}
     )
     selected_articles = select_parse_random(json.loads(news_articles.text))
-    analyzed_articles = analyzeDescriptions(selected_articles)
+    analyzed_articles = analyze_descriptions(selected_articles)
     response = {
         'statusCode': 200,
         'body': json.dumps(analyzed_articles)
@@ -71,17 +71,47 @@ def select_parse_random(news_articles):
         random_popular_stories.append(news_articles['articles'][index])
     parsed_stories =  list(
         map(
-            lambda x: {'title': x['title'], 'publication': x['source']['name'], 'url': x['url'], 'descrip': x['description']},
+            lambda x: {'title': x['title'], 'publication': x['source']
+                       ['name'], 'url': x['url'], 'description': x['description']},
             random_popular_stories
         )
     )
     return parsed_stories
 
-def analyzeDescriptions(articles):
+def analyze_descriptions(articles):
     """
     Adds political bias to each article
     """
     for article in articles:
-        article['pubBias'] = 'Neutral'
-        article['articleBias'] = 'Neutral'
+        text_to_analyze = article['title']
+        if article['description'] is not None:
+            text_to_analyze = text_to_analyze + '. ' + article['description']
+        params = {
+            'data': text_to_analyze
+        }
+        political_analysis = requests.post(
+            'https://apiv2.indico.io/political',
+            data=json.dumps(params),
+            headers={
+                'X-ApiKey': os.getenv('INDICO_KEY', '')
+            }
+        )
+        title_descrip_bias = json.loads(political_analysis.text)['results']
+        if political_analysis.status_code == 200:
+            highest_view = 0
+            highest_bias = None
+            for key in title_descrip_bias.keys():
+                if title_descrip_bias[key] > highest_view:
+                    highest_view = title_descrip_bias[key]
+                    highest_bias = key
+                elif title_descrip_bias[key] == highest_view:
+                    highest_bias = 'Neutral'
+            if highest_bias in ['Liberal', 'Green']:
+                article['articleBias'] = 'Liberal'
+            elif highest_bias is 'Neutral':
+                article['articleBias'] = 'Neutral'
+            else:
+                article['articleBias'] = 'Conservative'
+        else:
+            article['articleBias'] = 'Neutral'
     return articles
