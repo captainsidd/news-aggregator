@@ -24,9 +24,10 @@ def top_articles(event, context):
         headers={'Authorization': os.getenv('NEWS_API_KEY', '')}
     )
     selected_articles = select_parse_random(json.loads(news_articles.text))
+    analyzed_articles = analyzeDescriptions(selected_articles)
     response = {
-        "statusCode": 200,
-        "body": json.dumps(selected_articles)
+        'statusCode': 200,
+        'body': json.dumps(analyzed_articles)
     }
     return response
 
@@ -49,17 +50,22 @@ def query_article(event, context):
         headers={'Authorization': os.getenv('NEWS_API_KEY', '')}
     )
     selected_articles = select_parse_random(json.loads(news_articles.text))
+    analyzed_articles = analyzeDescriptions(selected_articles)
     response = {
-        "statusCode": 200,
-        "body": json.dumps(selected_articles)
+        'statusCode': 200,
+        'body': json.dumps(analyzed_articles)
     }
     return response
 
 def select_parse_random(news_articles):
     """
-    Takes given news articles and returns 20 random articles, leaving only important data
+    Takes given news articles and returns a max of 20 random articles, leaving only important data
     """
-    indexes = random.sample(range(0, 100), 20)
+    indexes = []
+    if len(news_articles['articles']) < 20:
+        indexes = range(0, len(news_articles))
+    else:
+        indexes = random.sample(range(0, len(news_articles['articles'])), 20)
     random_popular_stories = []
     for index in indexes:
         random_popular_stories.append(news_articles['articles'][index])
@@ -71,6 +77,11 @@ def select_parse_random(news_articles):
     )
     return parsed_stories
 
-def analyzeDescriptions(article):
-    pass
-
+def analyzeDescriptions(articles):
+    """
+    Adds political bias to each article
+    """
+    for article in articles:
+        article['pubBias'] = 'Neutral'
+        article['articleBias'] = 'Neutral'
+    return articles
