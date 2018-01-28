@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './links.css';
 
 const BASE_URL = 'https://idmabf73da.execute-api.us-east-1.amazonaws.com/dev'
 
@@ -29,7 +30,6 @@ class App extends Component {
       });
   }
 
-
   componentWillMount() {
     this.fetchData();
   }
@@ -48,7 +48,7 @@ class App extends Component {
     const listItems = articles !== undefined ? articles.map((d) =>
       <li key={d.title}>
         <p>
-          This article from {d.publication} is most likely {d.articleBias}: <a href={d.url}>{d.title}</a>
+          This article from {d.publication} is most likely <strong className={d.articleBias}>{d.articleBias}</strong>: <a href={d.url}>{d.title}</a>
         </p>
       </li>
     ): [];
