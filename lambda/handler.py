@@ -121,5 +121,5 @@ def analyze_descriptions(articles):
             else:
                 article['articleBias'] = 'Conservative'
         else:
-            article['articleBias'] = 'Neutral'
+            article['articleBias'] = 'Unknown'
     return articles
