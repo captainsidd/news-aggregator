@@ -68,6 +68,7 @@ def query_article(event, context):
 def select_parse_random(news_articles):
     """
     Takes given news articles and returns a max of 20 random articles, leaving only important data
+    @TODO: Figure out how to make this better. 20 random articles isn't the best representation of the days news.
     """
     indexes = []
     if len(news_articles['articles']) < 20:
